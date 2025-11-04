@@ -2,12 +2,11 @@ import { createSignal, createContext, useContext} from "solid-js";
 import type { JSX } from "solid-js";
 
 type User = {
-    id: string;
     email: string;
-    firstName: string;
-    lastName: string;
-    userName: string;
-    isAdmin?: boolean;
+    first_name: string;
+    last_name: string;
+    username: string;
+    phone_number: string;
 } | null;
 
 type UserContextType = [
@@ -18,7 +17,7 @@ type UserContextType = [
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider(props: { children: JSX.Element }) {
-    const storedUser = localStorage.getItem("combat_user");
+    const storedUser = localStorage.getItem("flow_user");
     const [user, setUser] = createSignal<User>(
         storedUser ? JSON.parse(storedUser) : null
     );
