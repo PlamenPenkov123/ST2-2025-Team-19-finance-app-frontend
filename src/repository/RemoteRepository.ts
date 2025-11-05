@@ -6,14 +6,14 @@ export interface RemoteRepository {
 
     // Categories
     getIncomeCategories(): Promise<any>;
-    getExpenseCategories(): Promise<any>;
-    getPaymentMethods(): Promise<any>;
+    getExpenseCategories(token: string): Promise<any>;
+    getPaymentMethods(token: string): Promise<any>;
 
     // Budget
     getBudget(token: string): Promise<any>;
-    storeBudget(token: string, amount: number, month: number): Promise<any>;
+    storeBudget(token: string, amount: number, month: string): Promise<any>;
     deleteBudget(token: string): Promise<any>;
-    updateBudget(token: string, amount: number, month: number): Promise<any>;
+    updateBudget(token: string, amount: number, month: string): Promise<any>;
 
     // Incomes
     getAllIncomes(token: string): Promise<any>;

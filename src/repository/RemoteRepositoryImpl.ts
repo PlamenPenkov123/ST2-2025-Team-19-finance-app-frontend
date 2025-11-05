@@ -99,11 +99,12 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async getExpenseCategories(): Promise<any>{
+    async getExpenseCategories(token: string): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/expense-categories`, {
                 method: 'GET',
                 headers: {
+                    'Authorization': `Token ${token}`,
                     'Accept': 'application/json',
                 },
             });
@@ -116,11 +117,12 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async getPaymentMethods(): Promise<any>{
+    async getPaymentMethods(token: string): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/payment-methods`, {
                 method: 'GET',
                 headers: {
+                    'Authorization': `Token ${token}`,
                     'Accept': 'application/json',
                 },
             });
@@ -153,7 +155,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async storeBudget(token: string, amount: number, month: number): Promise<any>{
+    async storeBudget(token: string, amount: number, month: string): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/budgets`, {
                 method: 'POST',
@@ -199,7 +201,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async updateBudget(token: string, amount: number, month: number): Promise<any>{
+    async updateBudget(token: string, amount: number, month: string): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/budgets`, {
                 method: 'PUT',

@@ -11,6 +11,8 @@ import Contact from "./presentation/pages/Contact";
 import NotFound from "./presentation/pages/NotFound";
 import Profile from "./presentation/pages/Profile";
 import FinanceManager from "./presentation/pages/FinanceManager";
+import FinanceManagerIncomes from "./presentation/components/finance-manager/FinanceManagerIncomes";
+import FinanceManagerExpenses from "./presentation/components/finance-manager/FinanceManagerExpenses";
 
 const root = document.getElementById('root')
 
@@ -23,7 +25,11 @@ render(() => (
                 <Route path="/contact" component={Contact}/>
                 <Route path="profile" component={Profile}/>
                 <Route path="*" component={NotFound}/>
-                <Route path="/finance-manager" component={FinanceManager}></Route>
+                <Route path="/finance-manager" component={FinanceManager}>
+                    <Route path="/" component={FinanceManagerIncomes}/>
+                    <Route path="/incomes" component={FinanceManagerIncomes}/>
+                    <Route path="/expenses" component={FinanceManagerExpenses}/>
+                </Route>
             </Router>
         </UserProvider>
     </AuthProvider>
