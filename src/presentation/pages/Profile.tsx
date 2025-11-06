@@ -15,7 +15,7 @@ export default function Profile() {
     });
 
     return (
-        <div class="w-full min-h-screen bg-white px-4 py-10 flex flex-col items-center">
+        <div class="w-full min-h-[70vh] bg-white px-4 py-10 flex flex-col items-center">
             <Motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}

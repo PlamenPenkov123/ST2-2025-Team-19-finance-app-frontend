@@ -3,7 +3,7 @@ import { Motion } from "@motionone/solid";
 
 export default function Contact() {
     return (
-        <div class="min-h-screen bg-white text-gray-800 flex flex-col items-center px-6 py-16">
+        <div class="min-h-[80vh] bg-white text-gray-800 flex flex-col items-center px-6 py-16">
             <Motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}

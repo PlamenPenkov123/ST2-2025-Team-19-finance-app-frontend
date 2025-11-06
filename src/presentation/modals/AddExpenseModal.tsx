@@ -6,7 +6,7 @@ import { useAuthContext } from "../../context/AuthContext";
 
 const repo = new RemoteRepositoryImpl();
 
-export const AddIncomeModal = (props: {
+export const AddExpenseModal = (props: {
     state: boolean | undefined;
     onSuccess: () => void;
     onClose: () => void;
@@ -14,63 +14,70 @@ export const AddIncomeModal = (props: {
     const [amount, setAmount] = createSignal<number | undefined>(undefined);
     const [date, setDate] = createSignal<string | undefined>(undefined);
     const [description, setDescription] = createSignal<string | undefined>(undefined);
-    const [source, setSource] = createSignal<string | undefined>(undefined);
-    const [incomeCategory, setIncomeCategory] = createSignal<number | undefined>(undefined);
+    const [expenseCategory, setExpenseCategory] = createSignal<number | undefined>(undefined);
+    const [paymentMethod, setPaymentMethod] = createSignal<number | undefined>(undefined);
 
-    const [incomeCategories, setIncomeCategories] = createSignal<
+    const [expenseCategories, setExpenseCategories] = createSignal<
+        { id: number; name: string; slug: string }[]
+    >([]);
+    const [paymentMethods, setPaymentMethods] = createSignal<
         { id: number; name: string; slug: string }[]
     >([]);
 
     const [error, setError] = createSignal<string | null>(null);
-    const [token] = useAuthContext();
     const [isLoading, setIsLoading] = createSignal<boolean>(false);
+    const [token] = useAuthContext();
 
     onMount(async () => {
+        const fToken = token();
+        if(!fToken) return;
+
         try {
-            const fCategories = await repo.getIncomeCategories();
-            setIncomeCategories(fCategories);
-            console.log(`Income categories: ${JSON.stringify(fCategories)}`);
+            const fCategories = await repo.getExpenseCategories(fToken);
+            const fPaymentMethods = await repo.getPaymentMethods(fToken);
+            setExpenseCategories(fCategories);
+            setPaymentMethods(fPaymentMethods);
         } catch (err) {
-            console.error("Error fetching categories:", err);
+            console.error("Error fetching data:", err);
+            setError("Failed to load categories or payment methods.");
         }
     });
 
+    // ✅ Submit form
     const onSubmit = async () => {
         setError(null);
         const authToken = token();
         if (!authToken) return;
 
         const fAmount = amount();
-        const fSource = source();
         const fDescription = description();
-        const fIncomeCategory = incomeCategory();
         const fDate = date();
+        const fExpenseCategory = expenseCategory();
+        const fPaymentMethod = paymentMethod();
 
-        if (!fAmount || !fSource || !fDescription || !fIncomeCategory || !fDate) {
+        if (!fAmount || !fDescription || !fDate || !fExpenseCategory || !fPaymentMethod) {
             setError("Please fill in all fields.");
             return;
         }
 
         try {
             setIsLoading(true);
-
-            // ✅ Convert date to "YYYY-MM-DD"
             const formattedDate = new Date(fDate).toISOString().split("T")[0];
 
-            await repo.storeIncome(
+            await repo.storeExpense(
                 authToken,
                 Number(fAmount),
                 fDescription,
-                fSource,
-                formattedDate, // <- send this string
-                fIncomeCategory
+                formattedDate,
+                fExpenseCategory,
+                fPaymentMethod
             );
 
             props.onSuccess();
             props.onClose();
         } catch (err) {
             console.error(err);
-            setError("Error while adding income. Please try again.");
+            setError("Error while adding expense. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -80,7 +87,7 @@ export const AddIncomeModal = (props: {
         <Modal state={props.state} onClose={props.onClose}>
             {() => (
                 <div class="max-h-[90vh] overflow-y-auto w-[90%] sm:w-[28rem] bg-white border border-[#E2E8E2] rounded-2xl shadow-lg p-6 sm:p-8 relative text-gray-800">
-                    <LoadingIndicator isLoading={isLoading()} loadingText="Saving income..." />
+                    <LoadingIndicator isLoading={isLoading()} loadingText="Saving expense..." />
 
                     {/* Close button */}
                     <button
@@ -99,15 +106,17 @@ export const AddIncomeModal = (props: {
                         }}
                     >
                         <h2 class="text-2xl font-bold text-center text-[#708B75] mb-1">
-                            Add Income
+                            Add Expense
                         </h2>
                         <p class="text-sm text-gray-500 text-center mb-3">
-                            Record your income to keep track of your financial flow.
+                            Record your expense to track your financial outflow.
                         </p>
 
                         {/* Amount */}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Amount
+                            </label>
                             <input
                                 type="number"
                                 placeholder="Enter amount..."
@@ -115,19 +124,6 @@ export const AddIncomeModal = (props: {
                                 onInput={(e) => setAmount(Number(e.currentTarget.value))}
                                 required
                                 min="0"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#C9DABD] transition"
-                            />
-                        </div>
-
-                        {/* Source */}
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Source</label>
-                            <input
-                                type="text"
-                                placeholder="e.g. Job, Bonus, Investment..."
-                                value={source() ?? ""}
-                                onInput={(e) => setSource(e.currentTarget.value)}
-                                required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#C9DABD] transition"
                             />
                         </div>
@@ -159,19 +155,41 @@ export const AddIncomeModal = (props: {
                             />
                         </div>
 
+                        {/* Payment Method */}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Payment Method
+                            </label>
+                            <select
+                                value={paymentMethod() ?? ""}
+                                onInput={(e) => setPaymentMethod(Number(e.currentTarget.value))}
+                                required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#C9DABD] transition"
+                            >
+                                <option value="">Select payment method...</option>
+                                <For each={paymentMethods()}>
+                                    {(method) => (
+                                        <option value={method.id}>
+                                            {method.name.charAt(0).toUpperCase() + method.name.slice(1)}
+                                        </option>
+                                    )}
+                                </For>
+                            </select>
+                        </div>
+
                         {/* Category */}
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Category
                             </label>
                             <select
-                                value={incomeCategory() ?? ""}
-                                onInput={(e) => setIncomeCategory(Number(e.currentTarget.value))}
+                                value={expenseCategory() ?? ""}
+                                onInput={(e) => setExpenseCategory(Number(e.currentTarget.value))}
                                 required
                                 class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm sm:text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#C9DABD] transition"
                             >
                                 <option value="">Select category...</option>
-                                <For each={incomeCategories()}>
+                                <For each={expenseCategories()}>
                                     {(cat) => (
                                         <option value={cat.id}>
                                             {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
@@ -191,7 +209,7 @@ export const AddIncomeModal = (props: {
                             type="submit"
                             class="w-full bg-[#C9DABD] text-gray-800 font-semibold rounded-lg py-2 sm:py-3 text-sm sm:text-base hover:bg-[#b7cba9] transition-colors cursor-pointer shadow-md"
                         >
-                            Save Income
+                            Save Expense
                         </button>
                     </form>
                 </div>

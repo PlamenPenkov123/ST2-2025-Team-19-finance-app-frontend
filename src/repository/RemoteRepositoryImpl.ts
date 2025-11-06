@@ -276,7 +276,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
     async updateIncome(token: string, amount: number, description: string, source: string, date: string, income_category: number, incomeId: number): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/incomes/${incomeId}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {
                     'Authorization': `Token ${token}`,
                     'Content-Type': 'application/json',
@@ -358,7 +358,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async storeExpense(token: string, amount: number, description: string, source: string, date: string, expense_category: number, payment_method: number): Promise<any>{
+    async storeExpense(token: string, amount: number, description: string, date: string, expense_category: number, payment_method: number): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/expenses`, {
                 method: 'POST',
@@ -369,7 +369,6 @@ export class RemoteRepositoryImpl implements RemoteRepository {
                 body: JSON.stringify({
                     amount: amount,
                     description: description,
-                    source: source,
                     date: date,
                     expense_category: expense_category,
                     payment_method: payment_method
@@ -387,10 +386,10 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async updateExpense(token: string, amount: number, description: string, source: string, date: string, expense_category: number, expenseId: number, payment_method: number): Promise<any>{
+    async updateExpense(token: string, amount: number, description: string, date: string, expense_category: number, expenseId: number, payment_method: number): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/expenses/${expenseId}`, {
-                method: 'PUT',
+                method: 'PATCH',
                 headers: {
                     'Authorization': `Token ${token}`,
                     'Content-Type': 'application/json',
@@ -398,7 +397,6 @@ export class RemoteRepositoryImpl implements RemoteRepository {
                 body: JSON.stringify({
                     amount: amount,
                     description: description,
-                    source: source,
                     date: date,
                     expense_category: expense_category,
                     payment_method: payment_method

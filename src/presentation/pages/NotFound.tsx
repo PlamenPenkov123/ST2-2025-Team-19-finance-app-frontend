@@ -4,7 +4,7 @@ export default function NotFound() {
     const navigate = useNavigate();
 
     return (
-        <div class="w-full min-h-screen bg-white flex items-center justify-center p-4">
+        <div class="w-full min-h-[80vh] bg-white flex items-center justify-center p-4">
             <div class="bg-[#f8faf8] w-full max-w-2xl rounded-2xl shadow-md p-10 text-center space-y-6 border border-[#E2E8E2]">
                 <svg
                     class="mx-auto h-20 w-20 text-[#C9DABD]"

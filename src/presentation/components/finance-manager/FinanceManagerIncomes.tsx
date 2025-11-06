@@ -2,6 +2,8 @@ import { createSignal, onMount, For, Show } from "solid-js";
 import { RemoteRepositoryImpl } from "../../../repository/RemoteRepositoryImpl";
 import { useAuthContext } from "../../../context/AuthContext";
 import {AddIncomeModal} from "../../modals/AddIncomeModal";
+import {UpdateIncomeModal} from "../../modals/UpdateIncomeModal";
+import {useBudgetContext} from "../../../context/BudgetContext";
 
 const repo = new RemoteRepositoryImpl();
 
@@ -10,6 +12,10 @@ export default function FinanceManagerIncomes() {
     const [token] = useAuthContext();
 
     const [isAddOpen, setIsAddOpen] = createSignal<true | undefined>(undefined);
+    const [isUpdateOpen, setIsUpdateOpen] = createSignal<true | undefined>(undefined);
+
+    const [incomeToUpdate, setIncomeToUpdate] = createSignal<any>(null);
+    const [_, setNeedsRefresh] = useBudgetContext();
 
     const getIncomes = async () => {
         const fToken = token();
@@ -23,6 +29,15 @@ export default function FinanceManagerIncomes() {
         }
     };
 
+    const deleteIncome = async (incomeId: number) => {
+        const fToken = token();
+        if (!fToken) return;
+
+        await repo.deleteIncome(fToken,incomeId);
+        await getIncomes();
+        setNeedsRefresh(true);
+    }
+
     onMount(async () => {
         await getIncomes();
     });
@@ -35,9 +50,36 @@ export default function FinanceManagerIncomes() {
                 onSuccess={async () => {
                     setIsAddOpen(undefined);
                     await getIncomes();
+                    setNeedsRefresh(true);
                 }}
                 onClose={() => {
                     setIsAddOpen(undefined);
+                }}
+            />
+            <UpdateIncomeModal
+                state={
+                    isUpdateOpen()
+                        ? {
+                            income: {
+                                id: incomeToUpdate()?.id,
+                                amount: incomeToUpdate()?.amount,
+                                date: incomeToUpdate()?.date,
+                                description: incomeToUpdate()?.description,
+                                source: incomeToUpdate()?.source,
+                                incomeCategory: incomeToUpdate()?.income_category, // match backend field
+                            },
+                        }
+                        : undefined
+                }
+                onSuccess={async () => {
+                    setIsUpdateOpen(undefined);
+                    setIncomeToUpdate(null);
+                    await getIncomes();
+                    setNeedsRefresh(true);
+                }}
+                onClose={() => {
+                    setIsUpdateOpen(undefined);
+                    setIncomeToUpdate(null);
                 }}
             />
             <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
@@ -84,13 +126,16 @@ export default function FinanceManagerIncomes() {
                                     <td class="px-4 py-3 flex justify-center gap-3">
                                         <button
                                             class="text-sm bg-[#C9DABD] hover:bg-[#b7cba9] text-gray-800 px-3 py-1 rounded-md font-medium transition"
-                                            onClick={() => console.log("Edit", income.id)}
+                                            onClick={() => {
+                                                setIncomeToUpdate(income);
+                                                setIsUpdateOpen(true);
+                                            }}
                                         >
                                             Edit
                                         </button>
                                         <button
                                             class="text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md font-medium transition"
-                                            onClick={() => console.log("Delete", income.id)}
+                                            onClick={async () => await deleteIncome(income.id)}
                                         >
                                             Delete
                                         </button>

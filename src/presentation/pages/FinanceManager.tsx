@@ -8,6 +8,7 @@ import { RemoteRepositoryImpl } from "../../repository/RemoteRepositoryImpl";
 import LoadingIndicator from "../components/general-components/LoadingIndicator";
 import { useAuthContext } from "../../context/AuthContext";
 import { AddBudgetModal } from "../modals/AddBudgetModal";
+import {useBudgetContext} from "../../context/BudgetContext";
 
 const repo = new RemoteRepositoryImpl();
 
@@ -15,17 +16,25 @@ export default function FinanceManager(props: any) {
     const [user] = useUserContext();
     const [token] = useAuthContext();
     const navigate = useNavigate();
-    const location = useLocation(); // ✅ Get current route
+    const location = useLocation();
 
     const [popupState, setPopupState] = createSignal<{ text: string; error?: boolean } | null>(null);
     const [isLoading, setIsLoading] = createSignal<boolean>(false);
-    const [isLoginOpen, setIsLoginOpen] = createSignal<true | undefined>(undefined);
-    const [isRegisterOpen, setIsRegisterOpen] = createSignal<true | undefined>(undefined);
     const [isAddBudgetOpen, setIsAddBudgetOpen] = createSignal<true | undefined>(undefined);
     const [budget, setBudget] = createSignal<number>(0);
+    const [needsRefresh, setNeedsRefresh] = useBudgetContext();
 
-    createEffect(() => {
-        if (!user()) setIsLoginOpen(true);
+    createEffect(async () => {
+        if (needsRefresh()) {
+            await getBudget();
+            setNeedsRefresh(false);
+        }
+    });
+
+    onMount(() => {
+        if (!user()){
+            navigate("/*");
+        }
     });
 
     const getBudget = async () => {
@@ -35,7 +44,7 @@ export default function FinanceManager(props: any) {
         try {
             setIsLoading(true);
             const fBudget = await repo.getBudget(fToken);
-            setBudget(fBudget.balance);
+            setBudget(fBudget.current_amount);
         } catch (err) {
             console.error(err);
         } finally {
@@ -43,38 +52,12 @@ export default function FinanceManager(props: any) {
         }
     };
 
-
-    onMount(async () => {
-        const fIncomeCategories = await repo.getIncomeCategories();
-        console.log(`Income categories: ${JSON.stringify(fIncomeCategories)}`);
-    })
-
     onMount(async () => await getBudget());
 
     return (
-        <div class="min-h-screen bg-white text-gray-800 flex flex-col items-center px-6 py-16">
+        <div class="min-h-[80vh] bg-white text-gray-800 flex flex-col items-center px-6 py-16">
             <TopCenterPopup state={popupState()} onClose={() => setPopupState(null)} />
             <LoadingIndicator isLoading={isLoading()} loadingText="Loading..." />
-
-            {/* ---------- MODALS ---------- */}
-            <LoginModal
-                state={isLoginOpen()}
-                onSuccess={() => {
-                    setIsLoginOpen(undefined);
-                    setPopupState({ text: "You logged in successfully!" });
-                    navigate("/finance-manager");
-                }}
-                onClose={() => setIsLoginOpen(undefined)}
-            />
-
-            <RegisterModal
-                state={isRegisterOpen()}
-                onSuccess={() => {
-                    setIsRegisterOpen(undefined);
-                    setIsLoginOpen(true);
-                }}
-                onClose={() => setIsRegisterOpen(undefined)}
-            />
 
             <AddBudgetModal
                 state={isAddBudgetOpen()}
@@ -85,7 +68,6 @@ export default function FinanceManager(props: any) {
                 onClose={() => setIsAddBudgetOpen(undefined)}
             />
 
-            {/* ---------- TOP SECTION ---------- */}
             <div class="w-11/12 sm:w-5/6 bg-[#F8FAF8] border border-[#E2E8E2] rounded-2xl shadow-sm p-8 sm:p-10 my-6 flex flex-col sm:flex-row items-center justify-between transition">
                 <div class="flex flex-col text-center sm:text-left mb-6 sm:mb-0">
                     <h2 class="text-2xl sm:text-3xl font-semibold text-[#708B75] mb-2">
@@ -112,7 +94,6 @@ export default function FinanceManager(props: any) {
                 </div>
             </div>
 
-            {/* ---------- NAVIGATION ---------- */}
             <nav class="w-11/12 sm:w-5/6 bg-[#F8FAF8] border border-[#E2E8E2] rounded-lg shadow-sm mb-8 flex justify-center sm:justify-start overflow-hidden">
                 <button
                     onClick={() => navigate("/finance-manager/incomes")}
@@ -136,7 +117,6 @@ export default function FinanceManager(props: any) {
                 </button>
             </nav>
 
-            {/* ---------- PAGE CONTENT ---------- */}
             <div class="flex justify-center w-full">
                 {props.children}
             </div>

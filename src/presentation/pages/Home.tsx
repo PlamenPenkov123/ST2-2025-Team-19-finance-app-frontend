@@ -1,8 +1,27 @@
-import { A } from "@solidjs/router";
+import {A, useNavigate} from "@solidjs/router";
+import {useUserContext} from "../../context/UserContext";
+import {LoginModal} from "../modals/LoginModal";
+import {createSignal} from "solid-js";
+import {TopCenterPopup} from "../components/general-components/TopCenterPopup";
 
 export default function Home() {
+    const navigate = useNavigate();
+    const [user] = useUserContext();
+    const [isLoginOpen, setIsLoginOpen] = createSignal<true | undefined>(undefined);
+    const [popupState, setPopupState] = createSignal<{ text: string; error?: boolean } | null>(null);
+
     return (
         <div class="w-full bg-[#F8FAF8] text-gray-800">
+            <TopCenterPopup state={popupState()} onClose={() => setPopupState(null)} />
+            <LoginModal
+                state={isLoginOpen()}
+                onSuccess={() => {
+                    setIsLoginOpen(undefined);
+                    setPopupState({ text: "You logged in successfully!" });
+                    navigate("/");
+                }}
+                onClose={() => setIsLoginOpen(undefined)}
+            />
             {/* Hero Section */}
             <section class="relative w-full h-[90vh] flex items-center justify-center overflow-hidden">
                 <img
@@ -22,12 +41,19 @@ export default function Home() {
                         clear and intuitive dashboard. Flow empowers you to make confident,
                         smarter financial decisions.
                     </p>
-                    <A
-                        href="/finance-manager"
+                    <div
+                        onClick={() => {
+                            if(user()) {
+                                navigate("/finance-manager");
+                            }
+                            else {
+                                setIsLoginOpen(true);
+                            }
+                        }}
                         class="inline-block bg-[#C9DABD] hover:bg-[#b7cba9] text-gray-900 font-semibold py-3 px-8 rounded-lg text-base sm:text-lg shadow-md transition-all duration-200"
                     >
                         Get Started
-                    </A>
+                    </div>
                 </div>
             </section>
 

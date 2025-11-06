@@ -24,8 +24,8 @@ export interface RemoteRepository {
 
     // Expenses
     getAllExpenses(token: string): Promise<any>;
-    storeExpense(token: string, amount: number, description: string, source: string, date: string, expense_category: number, payment_method: number): Promise<any>;
-    updateExpense(token: string, amount: number, description: string, source: string, date: string, expense_category: number, expenseId: number, payment_method: number): Promise<any>;
+    storeExpense(token: string, amount: number, description: string, date: string, expense_category: number, payment_method: number): Promise<any>;
+    updateExpense(token: string, amount: number, description: string, date: string, expense_category: number, expenseId: number, payment_method: number): Promise<any>;
     getExpenseById(token: string, expenseId: number): Promise<any>;
     deleteExpense(token: string, expenseId: number): Promise<any>;
 }
