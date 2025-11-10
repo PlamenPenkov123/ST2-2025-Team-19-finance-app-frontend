@@ -50,7 +50,7 @@ export default function Home() {
                                 setIsLoginOpen(true);
                             }
                         }}
-                        class="inline-block bg-[#C9DABD] hover:bg-[#b7cba9] text-gray-900 font-semibold py-3 px-8 rounded-lg text-base sm:text-lg shadow-md transition-all duration-200"
+                        class="inline-block bg-[#C9DABD] hover:bg-[#b7cba9] text-gray-900 cursor-pointer font-semibold py-3 px-8 rounded-lg text-base sm:text-lg shadow-md transition-all duration-200"
                     >
                         Get Started
                     </div>

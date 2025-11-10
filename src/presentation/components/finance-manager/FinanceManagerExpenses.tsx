@@ -4,6 +4,7 @@ import {useAuthContext} from "../../../context/AuthContext";
 import {AddExpenseModal} from "../../modals/AddExpenseModal";
 import {UpdateExpenseModal} from "../../modals/UpdateExpenseModal";
 import {useBudgetContext} from "../../../context/BudgetContext";
+import {TopCenterPopup} from "../general-components/TopCenterPopup";
 
 const repo = new RemoteRepositoryImpl();
 
@@ -16,6 +17,7 @@ export default function FinanceManagerExpenses() {
 
     const [expenseToUpdate, setExpenseToUpdate] = createSignal<any>(null);
     const [_, setNeedsRefresh] = useBudgetContext();
+    const [popupState, setPopupState] = createSignal<{ text: string; error?: boolean } | null>(null);
 
     const getExpenses = async () => {
         const fToken = token();
@@ -35,6 +37,7 @@ export default function FinanceManagerExpenses() {
 
         await repo.deleteExpense(fToken, expenseId);
         await getExpenses();
+        setPopupState({ text: "Expense deleted successfully!" });
         setNeedsRefresh(true);
     }
 
@@ -44,11 +47,13 @@ export default function FinanceManagerExpenses() {
 
     return (
         <div class="w-11/12 sm:w-5/6 bg-[#F8FAF8] border border-[#E2E8E2] rounded-xl shadow-sm p-6">
+            <TopCenterPopup state={popupState()} onClose={() => setPopupState(null)} />
             <AddExpenseModal
                 state={isAddOpen()}
                 onSuccess={async () => {
                     setIsAddOpen(undefined);
                     await getExpenses();
+                    setPopupState({ text: "Expense added successfully!" });
                     setNeedsRefresh(true);
                 }}
                 onClose={() => {
@@ -74,6 +79,7 @@ export default function FinanceManagerExpenses() {
                     setIsUpdateOpen(undefined);
                     setExpenseToUpdate(null);
                     await getExpenses();
+                    setPopupState({ text: "Expense updated successfully!" });
                     setNeedsRefresh(true);
                 }}
                 onClose={() => {
@@ -87,7 +93,7 @@ export default function FinanceManagerExpenses() {
                     onClick={() => {
                         setIsAddOpen(true)
                     }}
-                    class="bg-[#C9DABD] text-gray-800 font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-[#b7cba9] transition-all duration-200"
+                    class="bg-[#C9DABD] cursor-pointer text-gray-800 font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-[#b7cba9] transition-all duration-200"
                 >
                     + Add Expense
                 </button>
@@ -119,14 +125,14 @@ export default function FinanceManagerExpenses() {
                                 <tr class="border-t border-[#E2E8E2] hover:bg-[#F3F8F3] transition">
                                     <td class="px-4 py-3">{expense.date}</td>
                                     <td class="px-4 py-3">{expense.description}</td>
-                                    <td class="px-4 py-3">{expense.payment_method}</td>
-                                    <td class="px-4 py-3">{expense.expense_category}</td>
+                                    <td class="px-4 py-3">{expense.payment_method.name}</td>
+                                    <td class="px-4 py-3">{expense.expense_category.name}</td>
                                     <td class="px-4 py-3 font-semibold text-red-600">
                                         -{expense.amount} lv.
                                     </td>
                                     <td class="px-4 py-3 flex justify-center gap-3">
                                         <button
-                                            class="text-sm bg-[#C9DABD] hover:bg-[#b7cba9] text-gray-800 px-3 py-1 rounded-md font-medium transition"
+                                            class="text-sm bg-[#C9DABD] cursor-pointer hover:bg-[#b7cba9] text-gray-800 px-3 py-1 rounded-md font-medium transition"
                                             onClick={() => {
                                                 setExpenseToUpdate(expense);
                                                 setIsUpdateOpen(true);
@@ -135,7 +141,7 @@ export default function FinanceManagerExpenses() {
                                             Edit
                                         </button>
                                         <button
-                                            class="text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md font-medium transition"
+                                            class="text-sm bg-red-500 cursor-pointer hover:bg-red-600 text-white px-3 py-1 rounded-md font-medium transition"
                                             onClick={async () => await deleteExpense(expense.id)}
                                         >
                                             Delete

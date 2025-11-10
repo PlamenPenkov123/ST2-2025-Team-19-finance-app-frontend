@@ -1,6 +1,6 @@
 import { useUserContext } from "../../context/UserContext";
 import { LoginModal } from "../modals/LoginModal";
-import { createEffect, createSignal, onMount } from "solid-js";
+import {createEffect, createMemo, createSignal, onMount, Show} from "solid-js";
 import { useNavigate, useLocation } from "@solidjs/router"; // ✅ add useLocation
 import { TopCenterPopup } from "../components/general-components/TopCenterPopup";
 import { RegisterModal } from "../modals/RegisterModal";
@@ -44,6 +44,7 @@ export default function FinanceManager(props: any) {
         try {
             setIsLoading(true);
             const fBudget = await repo.getBudget(fToken);
+            console.log(`F budget nigga: ${JSON.stringify(fBudget)}`);
             setBudget(fBudget.current_amount);
         } catch (err) {
             console.error(err);
@@ -63,6 +64,7 @@ export default function FinanceManager(props: any) {
                 state={isAddBudgetOpen()}
                 onSuccess={async () => {
                     await getBudget();
+                    setPopupState({ text: "Budget added successfully!" });
                     setIsAddBudgetOpen(undefined);
                 }}
                 onClose={() => setIsAddBudgetOpen(undefined)}
@@ -74,7 +76,9 @@ export default function FinanceManager(props: any) {
                         Current Budget
                     </h2>
                     <p class="text-4xl sm:text-5xl font-bold text-gray-800">
-                        {budget().toLocaleString()} lv.
+                        <Show when={budget()} fallback={<div>0 lv.</div>}>
+                            {budget().toLocaleString()} lv.
+                        </Show>
                     </p>
                 </div>
 
@@ -82,44 +86,61 @@ export default function FinanceManager(props: any) {
                 <div class="block sm:hidden w-24 h-px bg-gray-300 my-4"></div>
 
                 <div class="flex flex-col items-center sm:items-end">
-                    <button
-                        onClick={() => setIsAddBudgetOpen(true)}
-                        class="bg-[#C9DABD] text-gray-800 font-semibold px-8 py-3 rounded-lg shadow-md hover:bg-[#b7cba9] transition-all duration-200"
-                    >
-                        + Add Budget
-                    </button>
+                    <Show when={!budget()}>
+                        <button
+                            onClick={() => setIsAddBudgetOpen(true)}
+                            class="bg-[#C9DABD] text-gray-800 font-semibold px-8 py-3 rounded-lg cursor-pointer shadow-md hover:bg-[#b7cba9] transition-all duration-200"
+                        >
+                            + Add Budget
+                        </button>
+                    </Show>
                     <p class="text-sm text-gray-500 mt-2">
-                        Track your monthly spending easily
+                        Track your spending easily
                     </p>
                 </div>
             </div>
 
-            <nav class="w-11/12 sm:w-5/6 bg-[#F8FAF8] border border-[#E2E8E2] rounded-lg shadow-sm mb-8 flex justify-center sm:justify-start overflow-hidden">
-                <button
-                    onClick={() => navigate("/finance-manager/incomes")}
-                    class={`px-6 py-3 font-semibold transition duration-150 ${
-                        location.pathname.includes("/incomes")
-                            ? "bg-[#C9DABD] text-gray-900"
-                            : "text-[#708B75] hover:bg-[#E6EFE6]"
-                    }`}
-                >
-                    Incomes
-                </button>
-                <button
-                    onClick={() => navigate("/finance-manager/expenses")}
-                    class={`px-6 py-3 font-semibold transition duration-150 ${
-                        location.pathname.includes("/expenses")
-                            ? "bg-[#C9DABD] text-gray-900"
-                            : "text-[#708B75] hover:bg-[#E6EFE6]"
-                    }`}
-                >
-                    Expenses
-                </button>
-            </nav>
-
-            <div class="flex justify-center w-full">
-                {props.children}
-            </div>
+            <Show when={budget()} fallback={
+                <div class="w-11/12 sm:w-5/6 bg-[#F8FAF8] border border-[#E2E8E2] rounded-lg shadow-sm p-10 text-center text-gray-700">
+                    <h3 class="text-2xl font-semibold mb-4 text-[#708B75]">No budget set yet</h3>
+                    <p class="mb-6">
+                        Start by adding your first budget to unlock income and expense tracking.
+                    </p>
+                    <button
+                        onClick={() => setIsAddBudgetOpen(true)}
+                        class="bg-[#C9DABD] text-gray-800 font-semibold px-8 py-3 rounded-lg cursor-pointer shadow-md hover:bg-[#b7cba9] transition-all duration-200"
+                    >
+                        + Add Budget
+                    </button>
+                </div>
+            }>
+                <nav class="w-11/12 sm:w-5/6 bg-[#F8FAF8] border border-[#E2E8E2] rounded-lg shadow-sm mb-8 flex justify-center sm:justify-start overflow-hidden">
+                    <button
+                        onClick={() => navigate("/finance-manager/incomes")}
+                        class={`px-6 py-3 font-semibold cursor-pointer transition duration-150 ${
+                            location.pathname === "/finance-manager" ||
+                            location.pathname.includes("/incomes")
+                                ? "bg-[#C9DABD] text-gray-900"
+                                : "text-[#708B75] hover:bg-[#E6EFE6]"
+                        }`}
+                    >
+                        Incomes
+                    </button>
+                    <button
+                        onClick={() => navigate("/finance-manager/expenses")}
+                        class={`px-6 py-3 font-semibold cursor-pointer transition duration-150 ${
+                            location.pathname.includes("/expenses")
+                                ? "bg-[#C9DABD] text-gray-900"
+                                : "text-[#708B75] hover:bg-[#E6EFE6]"
+                        }`}
+                    >
+                        Expenses
+                    </button>
+                </nav>
+                <div class="flex justify-center w-full">
+                    {props.children}
+                </div>
+            </Show>
         </div>
     );
 }

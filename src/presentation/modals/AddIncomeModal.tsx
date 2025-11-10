@@ -29,7 +29,6 @@ export const AddIncomeModal = (props: {
         try {
             const fCategories = await repo.getIncomeCategories();
             setIncomeCategories(fCategories);
-            console.log(`Income categories: ${JSON.stringify(fCategories)}`);
         } catch (err) {
             console.error("Error fetching categories:", err);
         }

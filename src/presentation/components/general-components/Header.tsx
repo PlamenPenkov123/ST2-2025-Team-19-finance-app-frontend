@@ -34,6 +34,7 @@ export default function Header() {
                 onSuccess={() => {
                     setIsRegisterOpen(undefined);
                     setIsLoginOpen(true);
+                    setPopupState({ text: "You registered successfully!" });
                 }}
                 onClose={() => setIsRegisterOpen(undefined)}
             />

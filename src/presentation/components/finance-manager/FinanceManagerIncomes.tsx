@@ -4,6 +4,7 @@ import { useAuthContext } from "../../../context/AuthContext";
 import {AddIncomeModal} from "../../modals/AddIncomeModal";
 import {UpdateIncomeModal} from "../../modals/UpdateIncomeModal";
 import {useBudgetContext} from "../../../context/BudgetContext";
+import {TopCenterPopup} from "../general-components/TopCenterPopup";
 
 const repo = new RemoteRepositoryImpl();
 
@@ -16,6 +17,7 @@ export default function FinanceManagerIncomes() {
 
     const [incomeToUpdate, setIncomeToUpdate] = createSignal<any>(null);
     const [_, setNeedsRefresh] = useBudgetContext();
+    const [popupState, setPopupState] = createSignal<{ text: string; error?: boolean } | null>(null);
 
     const getIncomes = async () => {
         const fToken = token();
@@ -35,6 +37,7 @@ export default function FinanceManagerIncomes() {
 
         await repo.deleteIncome(fToken,incomeId);
         await getIncomes();
+        setPopupState({ text: "Income deleted successfully!" });
         setNeedsRefresh(true);
     }
 
@@ -44,12 +47,13 @@ export default function FinanceManagerIncomes() {
 
     return (
         <div class="w-11/12 sm:w-5/6 bg-[#F8FAF8] border border-[#E2E8E2] rounded-xl shadow-sm p-6">
-            {/* Header with add button */}
+            <TopCenterPopup state={popupState()} onClose={() => setPopupState(null)} />
             <AddIncomeModal
                 state={isAddOpen()}
                 onSuccess={async () => {
                     setIsAddOpen(undefined);
                     await getIncomes();
+                    setPopupState({ text: "Income added successfully!" });
                     setNeedsRefresh(true);
                 }}
                 onClose={() => {
@@ -75,6 +79,7 @@ export default function FinanceManagerIncomes() {
                     setIsUpdateOpen(undefined);
                     setIncomeToUpdate(null);
                     await getIncomes();
+                    setPopupState({ text: "Income updated successfully!" });
                     setNeedsRefresh(true);
                 }}
                 onClose={() => {
@@ -86,7 +91,7 @@ export default function FinanceManagerIncomes() {
                 <h3 class="text-xl font-semibold text-[#708B75]">Your Records</h3>
                 <button
                     onClick={() => {setIsAddOpen(true)}}
-                    class="bg-[#C9DABD] text-gray-800 font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-[#b7cba9] transition-all duration-200"
+                    class="bg-[#C9DABD] cursor-pointer text-gray-800 font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-[#b7cba9] transition-all duration-200"
                 >
                     + Add Income
                 </button>
@@ -119,13 +124,13 @@ export default function FinanceManagerIncomes() {
                                     <td class="px-4 py-3">{income.date}</td>
                                     <td class="px-4 py-3">{income.description}</td>
                                     <td class="px-4 py-3">{income.source}</td>
-                                    <td class="px-4 py-3">{income.income_category}</td>
+                                    <td class="px-4 py-3">{income.income_category.name}</td>
                                     <td class="px-4 py-3 font-semibold text-green-600">
                                         +{income.amount} lv.
                                     </td>
                                     <td class="px-4 py-3 flex justify-center gap-3">
                                         <button
-                                            class="text-sm bg-[#C9DABD] hover:bg-[#b7cba9] text-gray-800 px-3 py-1 rounded-md font-medium transition"
+                                            class="text-sm bg-[#C9DABD] cursor-pointer hover:bg-[#b7cba9] text-gray-800 px-3 py-1 rounded-md font-medium transition"
                                             onClick={() => {
                                                 setIncomeToUpdate(income);
                                                 setIsUpdateOpen(true);
@@ -134,7 +139,7 @@ export default function FinanceManagerIncomes() {
                                             Edit
                                         </button>
                                         <button
-                                            class="text-sm bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md font-medium transition"
+                                            class="text-sm bg-red-500 cursor-pointer hover:bg-red-600 text-white px-3 py-1 rounded-md font-medium transition"
                                             onClick={async () => await deleteIncome(income.id)}
                                         >
                                             Delete
