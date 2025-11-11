@@ -28,4 +28,6 @@ export interface RemoteRepository {
     updateExpense(token: string, amount: number, description: string, date: string, expense_category_id: number, expenseId: number, payment_method_id: number): Promise<any>;
     getExpenseById(token: string, expenseId: number): Promise<any>;
     deleteExpense(token: string, expenseId: number): Promise<any>;
+
+    sendFAQ(question: string): Promise<any>
 }

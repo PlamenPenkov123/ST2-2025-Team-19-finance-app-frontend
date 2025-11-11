@@ -452,4 +452,22 @@ export class RemoteRepositoryImpl implements RemoteRepository {
             throw error;
         }
     }
+
+    private botURL: string = "http://localhost:11434/api/generate";
+    async sendFAQ(question: string): Promise<any>{
+        try {
+            const response = await fetch(this.botURL, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    model: "gemma3:270m",
+                    prompt: `You are a helpful FAQ bot. Answer briefly.\n\nUser: ${question}`,
+                })
+            })
+            return await response.json();
+        }catch(error) {
+            console.log('bot error: ',error);
+            throw error;
+        }
+    };
 }
