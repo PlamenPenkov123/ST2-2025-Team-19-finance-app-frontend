@@ -454,7 +454,8 @@ export class RemoteRepositoryImpl implements RemoteRepository {
     }
 
     private botURL: string = "http://localhost:11434/api/generate";
-    async sendFAQ(question: string): Promise<any>{
+
+    async sendFAQ(question: string, onChunk:(text: string) => void): Promise<void>{
         try {
             const response = await fetch(this.botURL, {
                 method: "POST",
@@ -462,11 +463,34 @@ export class RemoteRepositoryImpl implements RemoteRepository {
                 body: JSON.stringify({
                     model: "gemma3:270m",
                     prompt: `You are a helpful FAQ bot. Answer briefly.\n\nUser: ${question}`,
+                    stream: true
                 })
             })
-            return await response.json();
+
+            const reader = response.body!.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value);
+                const lines = chunk.split("\n").filter((l) => l.trim().startsWith("{"));
+
+                for (const line of lines) {
+                    try {
+                        const json = JSON.parse(line);
+                        if (json.response) onChunk(json.response);
+                    } catch {
+                        // ignore malformed JSON fragments
+                    }
+                }
+            }
+            onChunk("[DONE]");
+
         }catch(error) {
             console.log('bot error: ',error);
+            onChunk("[ERROR]");
             throw error;
         }
     };

@@ -29,5 +29,5 @@ export interface RemoteRepository {
     getExpenseById(token: string, expenseId: number): Promise<any>;
     deleteExpense(token: string, expenseId: number): Promise<any>;
 
-    sendFAQ(question: string): Promise<any>
+    sendFAQ(question: string, onChunk:(text: string) => void): Promise<void>;
 }

@@ -40,27 +40,56 @@ function App(props: any) {
     ]);
     const [input, setInput] = createSignal("");
     const [isLoading, setIsLoading] = createSignal(false);
+    createEffect(() => {
+        // Trigger every time messages() changes
+        messages();
+        queueMicrotask(() => {
+            if (chatBodyRef) {
+            chatBodyRef.scrollTop = chatBodyRef.scrollHeight;
+            }
+        });
+    });
 
-    const sendMessage = async () => {
+    const sendMessage = async (e?: Event) => {
+        e?.preventDefault();
         const question = input().trim();
         if (!question) return;
 
-        setMessages((prev) => [...prev, { role: "user", text: question }]);
+        let botIndex = 0;
+        setMessages((prev) => {
+            const updated = [...prev, { role: "user", text: question }, { role: "assistant", text: "" }];
+            botIndex = updated.length - 1;
+            return updated;
+        });
+
         setInput("");
         setIsLoading(true);
 
-        // Fake delay for demo
-        setTimeout(() => {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: "assistant",
-                    text:
-                        "This is an AI-generated answer. Replace this with a call to your FAQ LLM endpoint.",
-                },
-            ]);
+        let buffer = "";
+
+        try {
+            await repo.sendFAQ(question, (chunk) => {
+            if (chunk === "[DONE]") {
+                setIsLoading(false);
+                return;
+            }
+            if (chunk === "[ERROR]") {
+                setIsLoading(false);
+                buffer = "Sorry, something went wrong.";
+            } else {
+                buffer += chunk;
+            }
+
+            setMessages((prev) => {
+                const updated = [...prev];
+                updated[botIndex] = { role: "assistant", text: buffer };
+                return updated;
+            });
+            });
+        } catch (err) {
+            console.error(err);
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     // Send message on Enter
@@ -69,6 +98,8 @@ function App(props: any) {
     };
     window.addEventListener("keydown", handleKeyDown);
     onCleanup(() => window.removeEventListener("keydown", handleKeyDown));
+
+    let chatBodyRef: HTMLDivElement | undefined;
 
     return <div class="min-h-screen flex flex-col w-full">
         <Header/>
@@ -87,7 +118,7 @@ function App(props: any) {
 
             {/* Chat Window */}
             <Show when={isOpen()}>
-                <div class="fixed bottom-24 right-6 w-80 sm:w-96 bg-white border border-gray-300 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn">
+                <div class="fixed bottom-24 z-10 right-6 w-80 sm:w-96 bg-white border border-gray-300 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn">
                     {/* Header */}
                     <div class="bg-[#708B75] text-white px-4 py-3 flex justify-between items-center">
                         <span class="font-semibold">AI FAQ Assistant</span>
@@ -100,7 +131,7 @@ function App(props: any) {
                     </div>
 
                     {/* Chat Body */}
-                    <div class="flex-1 p-4 overflow-y-auto space-y-3 max-h-80">
+                    <div ref={chatBodyRef} class="flex-1 p-4 overflow-y-auto space-y-3 max-h-80">
                         <For each={messages()}>
                             {(msg) => (
                                 <div
