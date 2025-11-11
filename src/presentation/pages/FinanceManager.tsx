@@ -44,7 +44,6 @@ export default function FinanceManager(props: any) {
         try {
             setIsLoading(true);
             const fBudget = await repo.getBudget(fToken);
-            console.log(`F budget nigga: ${JSON.stringify(fBudget)}`);
             setBudget(fBudget.current_amount);
         } catch (err) {
             console.error(err);
