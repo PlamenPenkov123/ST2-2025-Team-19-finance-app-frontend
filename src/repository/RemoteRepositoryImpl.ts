@@ -245,7 +245,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async storeIncome(token: string, amount: number, description: string, source: string, date: string, income_category: number): Promise<any>{
+    async storeIncome(token: string, amount: number, description: string, source: string, date: string, income_category_id: number): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/incomes`, {
                 method: 'POST',
@@ -258,7 +258,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
                     description: description,
                     source: source,
                     date: date,
-                    income_category: income_category
+                    income_category_id: income_category_id
                 }),
             });
 
@@ -273,7 +273,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async updateIncome(token: string, amount: number, description: string, source: string, date: string, income_category: number, incomeId: number): Promise<any>{
+    async updateIncome(token: string, amount: number, description: string, source: string, date: string, income_category_id: number, incomeId: number): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/incomes/${incomeId}`, {
                 method: 'PATCH',
@@ -286,7 +286,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
                     description: description,
                     source: source,
                     date: date,
-                    income_category: income_category
+                    income_category_id: income_category_id
                 }),
             });
 
@@ -358,7 +358,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async storeExpense(token: string, amount: number, description: string, date: string, expense_category: number, payment_method: number): Promise<any>{
+    async storeExpense(token: string, amount: number, description: string, date: string, expense_category_id: number, payment_method_id: number): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/expenses`, {
                 method: 'POST',
@@ -370,8 +370,8 @@ export class RemoteRepositoryImpl implements RemoteRepository {
                     amount: amount,
                     description: description,
                     date: date,
-                    expense_category: expense_category,
-                    payment_method: payment_method
+                    expense_category_id: expense_category_id,
+                    payment_method_id: payment_method_id
                 }),
             });
 
@@ -386,7 +386,7 @@ export class RemoteRepositoryImpl implements RemoteRepository {
         }
     }
 
-    async updateExpense(token: string, amount: number, description: string, date: string, expense_category: number, expenseId: number, payment_method: number): Promise<any>{
+    async updateExpense(token: string, amount: number, description: string, date: string, expense_category_id: number, expenseId: number, payment_method_id: number): Promise<any>{
         try{
             const response = await fetch(`${this.apiUrl}/expenses/${expenseId}`, {
                 method: 'PATCH',
@@ -398,8 +398,8 @@ export class RemoteRepositoryImpl implements RemoteRepository {
                     amount: amount,
                     description: description,
                     date: date,
-                    expense_category: expense_category,
-                    payment_method: payment_method
+                    expense_category_id: expense_category_id,
+                    payment_method_id: payment_method_id
                 }),
             });
 

@@ -17,15 +17,15 @@ export interface RemoteRepository {
 
     // Incomes
     getAllIncomes(token: string): Promise<any>;
-    storeIncome(token: string, amount: number, description: string, source: string, date: string, income_category: number): Promise<any>;
-    updateIncome(token: string, amount: number, description: string, source: string, date: string, income_category: number, incomeId: number): Promise<any>;
+    storeIncome(token: string, amount: number, description: string, source: string, date: string, income_category_id: number): Promise<any>;
+    updateIncome(token: string, amount: number, description: string, source: string, date: string, income_category_id: number, incomeId: number): Promise<any>;
     getIncomeById(token: string, incomeId: number): Promise<any>;
     deleteIncome(token: string, incomeId: number): Promise<any>;
 
     // Expenses
     getAllExpenses(token: string): Promise<any>;
-    storeExpense(token: string, amount: number, description: string, date: string, expense_category: number, payment_method: number): Promise<any>;
-    updateExpense(token: string, amount: number, description: string, date: string, expense_category: number, expenseId: number, payment_method: number): Promise<any>;
+    storeExpense(token: string, amount: number, description: string, date: string, expense_category_id: number, payment_method_id: number): Promise<any>;
+    updateExpense(token: string, amount: number, description: string, date: string, expense_category_id: number, expenseId: number, payment_method_id: number): Promise<any>;
     getExpenseById(token: string, expenseId: number): Promise<any>;
     deleteExpense(token: string, expenseId: number): Promise<any>;
 }
